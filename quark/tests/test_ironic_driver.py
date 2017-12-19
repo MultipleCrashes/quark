@@ -569,6 +569,17 @@ class TestIronicDriverCreatePort(TestIronicDriverBase):
 
 class TestIronicDriverDeletePort(TestIronicDriverBase):
 
+    @contextlib.contextmanager
+    def _delete_port(self, context, port_id, side_effect=None):
+        with mock.patch('quark.drivers.ironic_driver._delete_port') as d_mock:
+            d_mock.return_value = port_id
+            if side_effect:
+                raise
+
+    def test_delete_port_with_delete_mock(self):
+        with self._delete_port(self.context, 'random_port') as delete_mock:
+            self.assertEquals(delete_mock.call_count, 1)
+
     def test_delete_port(self):
         with self._stubs(delete_port=[None]) as (driver, client,
                                                  _, delete):
