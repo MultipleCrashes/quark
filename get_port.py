@@ -1,6 +1,7 @@
 import requests
 import pprint
 import json
+import threading
 
 host='localhost'
 port=9696
@@ -20,18 +21,20 @@ def get_and_delete_port():
     total_port_count = len(all_port_ids)
     while i < total_port_count:
         try:
-            thread.start_new_thread(delete_port, (all_port_ids[i:i+100],))
-            print('i',i)
+            t = threading.Thread(target=delete_port, args = (all_port_ids[i:i+100],))
+            t.start()
             i= i + 100
+            print 'i ->', i
         except Exception as e:
-            print('Unable to start thread', str(e))
+            print('Unable to start thread -> ', str(e))
 
 
 def delete_port(port_list):
     for ports in port_list:
+        print 'Deleting port', ports
         delete_port_query_string = 'http://' + host + ':' + str(port) +'/v2.0/ports/' + ports
         delete_request = requests.delete(delete_port_query_string)
-
+        print 'Delete Response Code -> ', delete_request.status_code
 
 if __name__ == '__main__':
     get_and_delete_port()
